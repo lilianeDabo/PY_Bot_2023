@@ -29,6 +29,22 @@ async def hello(ctx):
 async def goodbye(ctx):
    await ctx.send("Goodbye, have a great day")
 
+@client.command(pass_context = True)
+async def join(ctx):
+  if (ctx.author.voice):
+      channel = ctx.message.author.voice.channel # if user in a voice channel, will join it
+      await channel.connect()
+  else:
+      await ctx.send("This is a command you can only run when you are in a voice channel.")
+
+@client.command(pass_context = True)
+async def leave(ctx):
+  if (ctx.voice_client):
+     await ctx.guild.voice_client.disconnect() # guild = server, voice_client = voice channel
+     await ctx.send("Leaving the voice channel") # leaves a message behind when they leave the voice channel
+  else:
+     await ctx.send("I'm no longer in a voice channel")
+      
 @client.event
 async def on_ready():
     print("𝔹𝕠𝕥𝕤 𝕒𝕣𝕖 𝕣𝕖𝕒𝕕𝕪")
