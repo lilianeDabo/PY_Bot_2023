@@ -5,6 +5,7 @@ from meteofrance_api import *
 
 from Key import *
 from discord.ext import commands
+from discord import FFmpegPCMAudio
 
 #autres fichiers
 from Dialogues import cues, returns
@@ -33,9 +34,14 @@ async def goodbye(ctx):
 async def join(ctx):
   if (ctx.author.voice):
       channel = ctx.message.author.voice.channel # if user in a voice channel, will join it
-      await channel.connect()
+      voice = await channel.connect()
+      source = FFmpegPCMAudio('join_bot.mp3')
+      player = voice.play(source)
   else:
-      await ctx.send("This is a command you can only run when you are in a voice channel.")
+        await ctx.send("This is a command you can only run when you are in a voice channel.")
+
+  
+    
 
 @client.command(pass_context = True)
 async def leave(ctx):
@@ -49,7 +55,6 @@ async def leave(ctx):
 async def on_ready():
     print("𝔹𝕠𝕥𝕤 𝕒𝕣𝕖 𝕣𝕖𝕒𝕕𝕪")
     print("--------------")
-
 
 
 @client.event
