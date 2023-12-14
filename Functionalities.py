@@ -12,7 +12,7 @@ from meteofrance_api import *
 # import des deux autres parties du projet
 from History import *
 from Dialogues import cues, returns
-
+L=chained_history_list()
 
 ### Toutes commandes
 
@@ -38,6 +38,9 @@ async def join(ctx):
       voice = await channel.connect()
       source = FFmpegPCMAudio('join_bot.mp3')
       player = voice.play(source)
+      L.get_last_command()
+      L.add_new_command("!join")
+      L.get_last_command()
   else:
         await ctx.send("This is a command you can only run when you are in a voice channel.")
 
@@ -46,8 +49,12 @@ async def leave(ctx):
   if (ctx.voice_client):
      await ctx.guild.voice_client.disconnect() # guild = server, voice_client = voice channel
      await ctx.send("Leaving the voice channel") # leaves a message behind when they leave the voice channel
+     L.get_last_command()
+     L.add_new_command("!leave")
+     L.get_last_command()
   else:
      await ctx.send("I'm no longer in a voice channel")
+  
 
 
 
