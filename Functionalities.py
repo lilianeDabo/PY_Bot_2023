@@ -16,20 +16,20 @@ L=chained_history_list()
 
 ### Toutes commandes
 
-@client.command()
-async def delete(ctx):
-    messages = await ctx.channel.history(limit=10)
+# @client.command()
+# async def delete(ctx):
+#     messages = await ctx.channel.history(limit=10)
 
-    for each_message in messages:
-        each_message.delete()
+#     for each_message in messages:
+#         each_message.delete()
 
-@client.command()
-async def hello(ctx):
-   await ctx.send("Hello, I am a youtube bot")
+# @client.command()
+# async def hello(ctx):
+#    await ctx.send("Hello, I am a youtube bot")
 
-@client.command()
-async def goodbye(ctx):
-   await ctx.send("Goodbye, have a great day")
+# @client.command()
+# async def goodbye(ctx):
+#    await ctx.send("Goodbye, have a great day")
 
 @client.command(pass_context = True)
 async def join(ctx):
@@ -38,9 +38,8 @@ async def join(ctx):
       voice = await channel.connect()
       source = FFmpegPCMAudio('join_bot.mp3')
       player = voice.play(source)
-      L.get_last_command()
-      L.add_new_command("!join")
-      L.get_last_command()
+
+      L.add_new_command("!join", str(ctx.author)) # Ajout de la commande dans l'historique
   else:
         await ctx.send("This is a command you can only run when you are in a voice channel.")
 
@@ -49,14 +48,19 @@ async def leave(ctx):
   if (ctx.voice_client):
      await ctx.guild.voice_client.disconnect() # guild = server, voice_client = voice channel
      await ctx.send("Leaving the voice channel") # leaves a message behind when they leave the voice channel
-     L.get_last_command()
-     L.add_new_command("!leave")
-     L.get_last_command()
+     
+     L.add_new_command("!leave", str(ctx.author)) # Ajout de la commande dans l'historique
   else:
      await ctx.send("I'm no longer in a voice channel")
-  
 
+@client.command()
+async def last_command(ctx):
+   await ctx.send(L.get_last_command()) # Renvoie la derniére commande inscrite dans l'historique
 
+@client.command()
+async def last_command_of(ctx):
+   user_name = str(ctx.author)
+   await ctx.send(L.get_last_command_of(user_name))
 
 
 ### Tous évènements
