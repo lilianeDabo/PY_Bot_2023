@@ -6,30 +6,17 @@ intents = discord.Intents.all()
 client = commands.Bot(command_prefix="!", intents = intents)
 
 # imports pour les functionalités
-from discord import FFmpegPCMAudio
+from discord import FFmpegPCMAudio, TextInput, TextStyle
 from meteofrance_api import *
 
 # import des deux autres parties du projet
 from History import *
 from Dialogues import cues, returns
+
 L=chained_history_list()
+current_index_scroll = 0
 
 ### Toutes commandes
-
-# @client.command()
-# async def delete(ctx):
-#     messages = await ctx.channel.history(limit=10)
-
-#     for each_message in messages:
-#         each_message.delete()
-
-# @client.command()
-# async def hello(ctx):
-#    await ctx.send("Hello, I am a youtube bot")
-
-# @client.command()
-# async def goodbye(ctx):
-#    await ctx.send("Goodbye, have a great day")
 
 @client.command(pass_context = True)
 async def join(ctx):
@@ -55,18 +42,35 @@ async def leave(ctx):
 
 @client.command()
 async def last_command(ctx):
+   L.add_new_command("!last_command", str(ctx.author))
    await ctx.send(L.get_last_command()) # Renvoie la derniére commande inscrite dans l'historique
 
 @client.command()
-async def last_command_of(ctx):
+async def all_commands_of(ctx):
    user_name = str(ctx.author)
-   await ctx.send(L.get_last_command_of(user_name))
+   L.add_new_command("!all_commands_of", str(ctx.author))
+   await ctx.send(L.get_all_commands_of(user_name)) # Renvoie toutes les commandes faites par un utilisateur
+
+@client.command()
+async def scrolling_forward(ctx):
+   last_index_scroll = L.size
+   global current_index_scroll
+   if current_index_scroll < last_index_scroll:
+      current_index_scroll += 1
+   await ctx.send(L.get_scroll(current_index_scroll))
+
+@client.command()
+async def scrolling_backwards(ctx):
+   global current_index_scroll
+   if current_index_scroll > 0:
+      current_index_scroll -= 1
+   await ctx.send(L.get_scroll(current_index_scroll))
 
 
 ### Tous évènements
 
 @client.event
-async def on_typing(channel, user, when):
+async def on_typing(channel, user):
      await channel.send(user.name+" is typing")
 
 @client.event
@@ -86,9 +90,11 @@ async def on_member_remove(member):
     general_channel = client.get_channel(1167470292088660020) #get_channel(channel x's id)
     await general_channel.send("Farewell  " + member.name + " !") 
 
+
 @client.event
 async def on_message(message):
-  if message.author == client.user:
+
+  if message.author == client.user :
     return
 
   message.content = message.content.lower()
@@ -101,14 +107,6 @@ async def on_message(message):
 
   if message.content == "azerty":
     await message.channel.send("qwerty")
-
-  await client.process_commands(message)
-
-@client.event
-#ne fait pas de distinction entre qui envoie un message ( peut se répondre à lui-même )
-async def on_message(message):
-  if message.author == client.user :
-    return
 
   if message.content.startswith(cues()):
     #détecter un message sur un channel et renvoyer un message
