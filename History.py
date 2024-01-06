@@ -33,17 +33,17 @@ class chained_history_list: # structure de la liste enchainé
             current_node = self.first_node
             while current_node.next_node != None:
                 current_node = current_node.next_node
-            return "The last command entered was : " + current_node.Data[0]
+            return current_node.Data[0]
         else:
-            return "The last command entered was : None"
+            return None
     
 
     def get_first_command(self): # cherche et prend la premiére commande de l'historique
         if self.first_node != None:
             current_node = self.first_node
-            return "The first command entered was : " + current_node.Data[0]
+            return current_node.Data[0]
         else:
-            return "There are no commands."
+            return None
     
     
     # cherche le user en question 
@@ -57,19 +57,14 @@ class chained_history_list: # structure de la liste enchainé
                     if current_node.Data[1] == user_name:
                         current_node = current_node.next_node
                         all_commands.append(current_node.Data[0])
-            return "Here are all the commands of " + user_name + " : " + str(all_commands)
+            return str(all_commands)        
         else:
-            return "There are currently no commands for " + user_name 
-    
-
+            return None
+        
     # avance et recule dans l'historique en fonction de l'index_scroll
     def get_scroll(self, current_index_scroll):
         count = 0
         current_node = self.first_node
-
-        # print("count:", count)
-        # print("current_index_scroll:", current_index_scroll)
-        # print("current_node:", current_node.Data[0])
 
         while current_node.next_node != None:
             if count == current_index_scroll:
@@ -78,11 +73,9 @@ class chained_history_list: # structure de la liste enchainé
                 current_node = current_node.next_node
                 count += 1
         
-        # print("Final count:", count)
-        # print("Final current_node:", current_node.Data[0])
         return "The current command is : " + current_node.Data[0]
     
-    def clear_history(self):
+    def clear_history(self): # efface l'historique and effaceant le premier node
         self.first_node = None
         self.size = 0
         return "The user's history has been cleared."
