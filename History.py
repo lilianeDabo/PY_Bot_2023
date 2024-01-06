@@ -1,5 +1,17 @@
-# Gestion de l'historique
+### Gestion de l'historique
 
+class queue_managing_history: # definition de la pile
+    def __init__(self):
+        self.lock = False
+    
+    def is_locked(self):
+        if self.lock == True:
+            return "The user's history is currently being modified. Please try again at a later time."
+        else:
+            return self.lock
+    
+
+### Creation de l'historique en soi
 class node: # structure du node
     def __init__(self, data): # initialisation
         self.Data = data
@@ -67,13 +79,13 @@ class chained_history_list: # structure de la liste enchainé
         current_node = self.first_node
 
         while current_node.next_node != None:
-            if count == current_index_scroll:
-                return "The current command is : " + current_node.Data[0]
+            if count == current_index_scroll: # cas si l'index n'est pas le dernier
+                return current_node.Data[0]
             else:
-                current_node = current_node.next_node
+                current_node = current_node.next_node # continue de se déplacer
                 count += 1
         
-        return "The current command is : " + current_node.Data[0]
+        return current_node.Data[0] # cas si l'index est pas le dernier
     
     def clear_history(self): # efface l'historique and effaceant le premier node
         self.first_node = None

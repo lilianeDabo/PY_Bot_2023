@@ -1,4 +1,5 @@
 # import des clés
+import threading
 from Keys import *
 
 # imports des 3 parties du projet
