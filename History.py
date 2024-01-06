@@ -57,7 +57,9 @@ class chained_history_list: # structure de la liste enchainé
                     if current_node.Data[1] == user_name:
                         current_node = current_node.next_node
                         all_commands.append(current_node.Data[0])
-        return "Here are all the commands of " + user_name + " : " + str(all_commands)
+            return "Here are all the commands of " + user_name + " : " + str(all_commands)
+        else:
+            return "There are currently no commands for " + user_name 
     
 
     # avance et recule dans l'historique en fonction de l'index_scroll
@@ -65,9 +67,9 @@ class chained_history_list: # structure de la liste enchainé
         count = 0
         current_node = self.first_node
 
-        print("count:", count)
-        print("current_index_scroll:", current_index_scroll)
-        print("current_node:", current_node.Data[0])
+        # print("count:", count)
+        # print("current_index_scroll:", current_index_scroll)
+        # print("current_node:", current_node.Data[0])
 
         while current_node.next_node != None:
             if count == current_index_scroll:
@@ -76,7 +78,12 @@ class chained_history_list: # structure de la liste enchainé
                 current_node = current_node.next_node
                 count += 1
         
-        print("Final count:", count)
-        print("Final current_node:", current_node.Data[0])
+        # print("Final count:", count)
+        # print("Final current_node:", current_node.Data[0])
         return "The current command is : " + current_node.Data[0]
+    
+    def clear_history(self):
+        self.first_node = None
+        self.size = 0
+        return "The user's history has been cleared."
     

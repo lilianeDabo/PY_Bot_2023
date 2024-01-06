@@ -42,14 +42,21 @@ async def leave(ctx):
 
 @client.command()
 async def last_command(ctx):
-   L.add_new_command("!last_command", str(ctx.author))
    await ctx.send(L.get_last_command()) # Renvoie la derniére commande inscrite dans l'historique
+   await ctx.send("This command has now been added as well.")
+   L.add_new_command("!last_command", str(ctx.author))
+
+@client.command()
+async def first_command(ctx):
+   L.add_new_command("!first_command", str(ctx.author))
+   await ctx.send(L.get_first_command()) # Renvoie la premiére commande inscrite dans l'historique
 
 @client.command()
 async def all_commands_of(ctx):
    user_name = str(ctx.author)
-   L.add_new_command("!all_commands_of", str(ctx.author))
    await ctx.send(L.get_all_commands_of(user_name)) # Renvoie toutes les commandes faites par un utilisateur
+   await ctx.send("This command has now been added as well.")
+   L.add_new_command("!all_commands_of", str(ctx.author))
 
 @client.command()
 async def scrolling_forward(ctx):
@@ -65,6 +72,10 @@ async def scrolling_backwards(ctx):
    if current_index_scroll > 0:
       current_index_scroll -= 1
    await ctx.send(L.get_scroll(current_index_scroll))
+
+@client.command()
+async def clear_history(ctx):
+   await ctx.send(L.clear_history())
 
 
 ### Tous évènements
