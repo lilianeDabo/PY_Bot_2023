@@ -1,4 +1,5 @@
 # Liaison avec discord
+import asyncio
 import discord
 from discord.ext import commands
 
@@ -11,10 +12,11 @@ from meteofrance_api import *
 
 # import des deux autres parties du projet
 from History import *
-from Dialogues import cues, returns
+from Dialogues import *
 
 L=chained_history_list() # Initialisation de notre liste enchainé représentant l'historique
 Q=queue_managing_history() # Initialisation de notre file de gestion de l'historique
+B=binary_tree() # Initialisation de notre questionnaire sous forme d'arbre binaire
 current_index_scroll = 0
 
 ### Toutes commandes
@@ -72,15 +74,15 @@ async def first_command(ctx):
       await ctx.send(f'{error}')
 
 @client.command()
-async def all_commands_of(ctx):
+async def all_commands_of(ctx, *, name): # On peut spécifier l'utilisateur en question en argument au moment du lancement de la commande
    if Q.is_locked() == False:
       Q.lock = True
-      user_name = str(ctx.author)
+      user_name = str(name)
       commands = L.get_all_commands_of(user_name)
       if commands != None:
          await ctx.send(f'Here are all the commands of {user_name} : {commands}') # Renvoie toutes les commandes faites par un utilisateur
          await ctx.send("This command has now been added as well.")
-         L.add_new_command("!all_commands_of", str(ctx.author))
+         L.add_new_command("!all_commands_of", str(ctx.author)) # on ajoute la nouvelle commande à l'auteur de celle-ci, pas la personne recherchée
       else:
          await ctx.send(f'There are currently no commands for {user_name}.')
          await ctx.send("This command will now be added however.")
@@ -91,16 +93,17 @@ async def all_commands_of(ctx):
       await ctx.send(f'{error}')
 
 @client.command()
-async def scrolling_forward(ctx): # Scroll en avant dans l'historique ( droite )
+async def scrolling_forward_of(ctx, *, name): # Scroll en avant dans un historique précis ( droite )
    if Q.is_locked() == False:
       Q.lock = True
-      user_name = str(ctx.author)
+      user_name = str(name)
+      commands = L.get_all_commands_of(user_name)
       if commands != None:
          last_index_scroll = L.size
          global current_index_scroll
          if current_index_scroll < last_index_scroll:
             current_index_scroll += 1
-            scroll_result = L.get_scroll(current_index_scroll)
+            scroll_result = L.get_scroll(current_index_scroll, user_name)
          await ctx.send(f'The current command is : {scroll_result}')
       else:
          await ctx.send(f'There are currently no commands for {user_name}.') 
@@ -110,15 +113,16 @@ async def scrolling_forward(ctx): # Scroll en avant dans l'historique ( droite )
       await ctx.send(f'{error}')
 
 @client.command()
-async def scrolling_backwards(ctx): # Scroll en arrière dans l'historique ( gauche )
+async def scrolling_backwards_of(ctx, *, name): # Scroll en arrière dans un historique précis ( gauche )
    if Q.is_locked() == False:
       Q.lock = True
-      user_name = str(ctx.author)
+      user_name = str(name)
+      commands = L.get_all_commands_of(user_name)
       if commands != None:
          global current_index_scroll
          if current_index_scroll > 0:
             current_index_scroll -= 1
-            scroll_result = L.get_scroll(current_index_scroll)
+            scroll_result = L.get_scroll(current_index_scroll, user_name)
          await ctx.send(f'The current command is : {scroll_result}')
       else:
          await ctx.send(f'There are currently no commands for {user_name}.') 
@@ -136,6 +140,53 @@ async def clear_history(ctx): # Effacement de l'historique
    else:
       error = Q.is_locked()
       await ctx.send(f'{error}')
+
+## Dialogue sous forme d'arbre binaire
+
+@client.command()
+async def binary_dialogue(ctx): # Lancement du questionnaire
+      def check(response): # Vérifie si la réponse a été fournis dans le même channel que la question
+         return response.channel == ctx.channel and response.author == ctx.author
+      
+      await ctx.send(B.get_current_dialogue()) # Début du dialogue
+
+      try:
+         user_response = await client.wait_for('message', check=check, timeout=180.0)
+         new_dialogue = B.get_on_response(user_response.content)
+         await ctx.send(new_dialogue)
+         user_response = await client.wait_for('message', check=check, timeout=180.0)
+         new_dialogue = B.create_more_dialogue(user_response.content)
+         await ctx.send(new_dialogue)
+         new_dialogue = B.get_current_dialogue()
+         await ctx.send(f"{new_dialogue}{user_response.content} ?") # Le dialogue s'est mis à jour
+         user_response = await client.wait_for('message', check=check, timeout=180.0)
+         if user_response.content == "yes":
+            file_path = './italian wood fired margherita pizza.jpg'
+
+            # Open the file in binary mode
+            with open(file_path, 'rb') as file:
+               image = discord.File(file)
+               await ctx.send(file=image)
+            
+            await ctx.send("Glad I could help ! This is the end of the binary tree dialogue.")
+         elif user_response.content == "no":
+            await ctx.send("That's ok ! This is the end of the binary tree dialogue.")
+      except asyncio.TimeoutError:
+         await ctx.send("You seem busy. The dialogue has ended.")
+
+@client.command()
+async def dialogue_reset(ctx): # Réinitialisation du questionnaire
+   B.get_dialogue_reset()
+   await ctx.send("The binary tree dialogue has been reset.")
+
+@client.command()
+async def speak_about(ctx, *, name): # Vérification des sujets abordables
+   list = ["pizza"]
+   for val in list:
+      if name == val:
+         await ctx.send(f"Yes ! We can talk about {val} (=^ω^=) !")
+      else:
+         await ctx.send(f"I'm sorry... I can't talk about that yet. ᇂ_ᇂ")
 
 
 

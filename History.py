@@ -63,29 +63,32 @@ class chained_history_list: # structure de la liste enchainé
     def get_all_commands_of(self, user_name): 
         all_commands = []
         if self.first_node != None:
-            all_commands.append(self.first_node.Data[0])
+            if self.first_node.Data[1] == user_name:
+                all_commands.append(self.first_node.Data[0])
             current_node = self.first_node
             while current_node.next_node != None:
                     if current_node.Data[1] == user_name:
                         current_node = current_node.next_node
                         all_commands.append(current_node.Data[0])
-            return str(all_commands)        
-        else:
-            return None
+            
+            if all_commands == []:
+                return None
+            else:
+                return str(all_commands)
         
     # avance et recule dans l'historique en fonction de l'index_scroll
-    def get_scroll(self, current_index_scroll):
+    def get_scroll(self, current_index_scroll, user_name):
         count = 0
         current_node = self.first_node
-
         while current_node.next_node != None:
-            if count == current_index_scroll: # cas si l'index n'est pas le dernier
+            if count == current_index_scroll and current_node.Data[1] == user_name: # cas si l'index n'est pas le dernier
                 return current_node.Data[0]
             else:
                 current_node = current_node.next_node # continue de se déplacer
                 count += 1
         
-        return current_node.Data[0] # cas si l'index est pas le dernier
+        if current_node.Data[1] == user_name:
+            return current_node.Data[0] # cas si l'index est le dernier
     
     def clear_history(self): # efface l'historique and effaceant le premier node
         self.first_node = None
