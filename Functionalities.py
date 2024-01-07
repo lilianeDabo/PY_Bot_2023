@@ -189,6 +189,16 @@ async def speak_about(ctx, *, name): # Vérification des sujets abordables
       else:
          await ctx.send(f"I'm sorry... I can't talk about that yet. ᇂ_ᇂ")
 
+## Hashmap
+@client.command()
+async def user_history(ctx, *, name):
+   guild = ctx.guild
+   user = discord.utils.get(guild.members, name=name)
+
+   user_history = dict(id=user.id, history=L.get_all_commands_of(name))
+   await ctx.send(f" This is the generated hashmap for {name} : {user_history}")
+
+## Sauvegarde
 @client.command()
 async def save(ctx):
    f_list = open("chained_list_save.json", "w")
@@ -198,6 +208,7 @@ async def save(ctx):
    f_queue.write(json.dumps(Q.queue_number))
    f_dialogue.write(json.dumps(B.get_current_dialogue()))
    
+
 
 ### Tous évènements
 
