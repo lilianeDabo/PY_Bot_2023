@@ -3,6 +3,7 @@
 class queue_managing_history: # definition de la pile
     def __init__(self):
         self.lock = False
+        self.queue_number = 0
     
     def is_locked(self):
         if self.lock == True:

@@ -1,5 +1,6 @@
 # Liaison avec discord
 import asyncio
+import json
 import discord
 from discord.ext import commands
 
@@ -188,7 +189,15 @@ async def speak_about(ctx, *, name): # Vérification des sujets abordables
       else:
          await ctx.send(f"I'm sorry... I can't talk about that yet. ᇂ_ᇂ")
 
-
+@client.command()
+async def save(ctx):
+   f_list = open("chained_list_save.json", "w")
+   f_queue = open("queue_save.json", "w")
+   f_dialogue = open("dialogue_save.json", "w")
+   f_list.write(json.dumps(L.get_all_commands_of("nynster")))
+   f_queue.write(json.dumps(Q.queue_number))
+   f_dialogue.write(json.dumps(B.get_current_dialogue()))
+   
 
 ### Tous évènements
 
