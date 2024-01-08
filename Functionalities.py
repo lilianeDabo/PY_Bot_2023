@@ -14,11 +14,20 @@ from meteofrance_api import *
 # import des deux autres parties du projet
 from History import *
 from Dialogues import *
+from Hashmap import *
 
-L=chained_history_list() # Initialisation de notre liste enchainé représentant l'historique
-Q=queue_managing_history() # Initialisation de notre file de gestion de l'historique
-B=binary_tree() # Initialisation de notre questionnaire sous forme d'arbre binaire
+L=ChainedHistoryList() # Initialisation de notre liste enchainé représentant l'historique
+Q=QueueManagingHistory() # Initialisation de notre file de gestion de l'historique
+B=BinaryTree() # Initialisation de notre questionnaire sous forme d'arbre binaire
+
+f_list = open("chained_list_save.json", "a")
+f_dialogue = open("dialogue_save.json", "a")
+
 current_index_scroll = 0
+all_user_history = []
+all_user_dialogue = []
+can_save_user_history = False
+can_save_user_dialogue = False
 
 ### Toutes commandes
 
@@ -44,6 +53,11 @@ async def leave(ctx):
   else:
      await ctx.send("I'm no longer in a voice channel")
 
+
+@client.command()
+async def clear_chat(ctx): # delete 100 chats
+   deleted_msgs = await ctx.channel.purge(limit=100)
+   await ctx.send(f"{len(deleted_msgs)} messages have been slain.")
 
 ## Commandes modifiant l'historique
 @client.command()
@@ -76,22 +90,22 @@ async def first_command(ctx):
 
 @client.command()
 async def all_commands_of(ctx, *, name): # On peut spécifier l'utilisateur en question en argument au moment du lancement de la commande
-   if Q.is_locked() == False:
-      Q.lock = True
-      user_name = str(name)
-      commands = L.get_all_commands_of(user_name)
-      if commands != None:
-         await ctx.send(f'Here are all the commands of {user_name} : {commands}') # Renvoie toutes les commandes faites par un utilisateur
-         await ctx.send("This command has now been added as well.")
-         L.add_new_command("!all_commands_of", str(ctx.author)) # on ajoute la nouvelle commande à l'auteur de celle-ci, pas la personne recherchée
+      if Q.is_locked() == False:
+         Q.lock = True
+         user_name = str(name)
+         commands = L.get_all_commands_of(user_name)
+         if commands != None:
+            await ctx.send(f'Here are all the commands of {user_name} : {commands}') # Renvoie toutes les commandes faites par un utilisateur
+            await ctx.send("This command has now been added as well.")
+            L.add_new_command("!all_commands_of", str(ctx.author)) # on ajoute la nouvelle commande à l'auteur de celle-ci, pas la personne recherchée
+         else:
+            await ctx.send(f'There are currently no commands for {user_name}.')
+            await ctx.send("This command will now be added however.")
+            L.add_new_command("!all_commands_of", str(ctx.author))
+         Q.lock = False
       else:
-         await ctx.send(f'There are currently no commands for {user_name}.')
-         await ctx.send("This command will now be added however.")
-         L.add_new_command("!all_commands_of", str(ctx.author))
-      Q.lock = False
-   else:
-      error = Q.is_locked()
-      await ctx.send(f'{error}')
+         error = Q.is_locked()
+         await ctx.send(f'{error}')
 
 @client.command()
 async def scrolling_forward_of(ctx, *, name): # Scroll en avant dans un historique précis ( droite )
@@ -144,7 +158,7 @@ async def clear_history(ctx): # Effacement de l'historique
 
 ## Dialogue sous forme d'arbre binaire
 
-@client.command()
+@client.command(name="help_bot")
 async def binary_dialogue(ctx): # Lancement du questionnaire
       def check(response): # Vérifie si la réponse a été fournis dans le même channel que la question
          return response.channel == ctx.channel and response.author == ctx.author
@@ -189,24 +203,46 @@ async def speak_about(ctx, *, name): # Vérification des sujets abordables
       else:
          await ctx.send(f"I'm sorry... I can't talk about that yet. ᇂ_ᇂ")
 
-## Hashmap
+## Hashmaps
 @client.command()
 async def user_history(ctx, *, name):
+   global can_save_user_history
+   can_save_user_history = True
    guild = ctx.guild
    user = discord.utils.get(guild.members, name=name)
 
-   user_history = dict(id=user.id, history=L.get_all_commands_of(name))
+   all_user_history.append(get_user_value_saved(user.id, L.get_all_commands_of(name), 'history'))
+
+   user_history = get_user_value_saved(user.id, L.get_all_commands_of(name), 'history') # Valeur sauvegardé est l'historique actuelle et son utilisateur
    await ctx.send(f" This is the generated hashmap for {name} : {user_history}")
+
+@client.command()
+async def user_dialogue(ctx, *, name):
+   global can_save_user_dialogue 
+   can_save_user_dialogue = True
+   guild = ctx.guild
+   user = discord.utils.get(guild.members, name=name)
+
+   all_user_dialogue.append(get_user_value_saved(user.id, B.get_current_dialogue(), 'dialogue'))
+
+   user_dialogue = get_user_value_saved(user.id, B.get_current_dialogue(), 'dialogue') # Valeur sauvegardé est le dialogue actuelle et son utilisateur
+   await ctx.send(f" This is the generated hashmap for {name} : {user_dialogue}")
 
 ## Sauvegarde
 @client.command()
 async def save(ctx):
-   f_list = open("chained_list_save.json", "w")
-   f_queue = open("queue_save.json", "w")
-   f_dialogue = open("dialogue_save.json", "w")
-   f_list.write(json.dumps(L.get_all_commands_of("nynster")))
-   f_queue.write(json.dumps(Q.queue_number))
-   f_dialogue.write(json.dumps(B.get_current_dialogue()))
+   if can_save_user_dialogue and can_save_user_history:
+      await ctx.send("Both users' history and dialogue have been saved in JSON files. It can be seen once this program ends.")
+      f_list.write(json.dumps(all_user_history)) # Sauvegarde de tous les hashmap fait avec les historiques des utilisateurs
+      f_dialogue.write(json.dumps(all_user_dialogue)) # Sauvegarde de les états actuels des dialogues avec leurs utilisateurs
+   elif can_save_user_history and not can_save_user_dialogue:
+      await ctx.send("All users' history have been saved in a JSON file. It can be seen once this program ends.")
+      f_list.write(json.dumps(all_user_history))
+   elif can_save_user_dialogue and not can_save_user_history:
+      await ctx.send("All users' dialogue have been saved in a JSON file. It can be seen once this program ends.")
+      f_dialogue.write(json.dumps(all_user_dialogue))
+   else:
+      await ctx.send("Please generate at least one user_history hashmap or one user_dialogue hashmap.")
    
 
 

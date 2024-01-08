@@ -1,9 +1,8 @@
 ### Gestion de l'historique
 
-class queue_managing_history: # definition de la pile
+class QueueManagingHistory: # definition de la pile
     def __init__(self):
         self.lock = False
-        self.queue_number = 0
     
     def is_locked(self):
         if self.lock == True:
@@ -13,12 +12,12 @@ class queue_managing_history: # definition de la pile
     
 
 ### Creation de l'historique en soi
-class node: # structure du node
+class Node: # structure du node
     def __init__(self, data): # initialisation
-        self.Data = data
+        self.data = data
         self.next_node = None
 
-class chained_history_list: # structure de la liste enchainé
+class ChainedHistoryList: # structure de la liste enchainé
     def __init__(self): # initialisation
         self.first_node = None
         self.size = 0
@@ -26,7 +25,7 @@ class chained_history_list: # structure de la liste enchainé
     def add_new_command(self, new_command, user_name):
         # cas du tout premier node
         if self.first_node == None:
-            self.first_node = node([new_command, user_name])
+            self.first_node = Node([new_command, user_name])
             self.size += 1
             return
         
@@ -36,7 +35,7 @@ class chained_history_list: # structure de la liste enchainé
         while current_node.next_node != None:
             current_node = current_node.next_node
         
-        new_node = node([new_command, user_name])
+        new_node = Node([new_command, user_name])
         current_node.next_node = new_node
         self.size += 1
         
@@ -46,7 +45,7 @@ class chained_history_list: # structure de la liste enchainé
             current_node = self.first_node
             while current_node.next_node != None:
                 current_node = current_node.next_node
-            return current_node.Data[0]
+            return current_node.data[0]
         else:
             return None
     
@@ -54,7 +53,7 @@ class chained_history_list: # structure de la liste enchainé
     def get_first_command(self): # cherche et prend la premiére commande de l'historique
         if self.first_node != None:
             current_node = self.first_node
-            return current_node.Data[0]
+            return current_node.data[0]
         else:
             return None
     
@@ -64,13 +63,13 @@ class chained_history_list: # structure de la liste enchainé
     def get_all_commands_of(self, user_name): 
         all_commands = []
         if self.first_node != None:
-            if self.first_node.Data[1] == user_name:
-                all_commands.append(self.first_node.Data[0])
+            if self.first_node.data[1] == user_name:
+                all_commands.append(self.first_node.data[0])
             current_node = self.first_node
             while current_node.next_node != None:
-                    if current_node.Data[1] == user_name:
+                    if current_node.data[1] == user_name:
                         current_node = current_node.next_node
-                        all_commands.append(current_node.Data[0])
+                        all_commands.append(current_node.data[0])
             
             if all_commands == []:
                 return None
@@ -82,14 +81,14 @@ class chained_history_list: # structure de la liste enchainé
         count = 0
         current_node = self.first_node
         while current_node.next_node != None:
-            if count == current_index_scroll and current_node.Data[1] == user_name: # cas si l'index n'est pas le dernier
-                return current_node.Data[0]
+            if count == current_index_scroll and current_node.data[1] == user_name: # cas si l'index n'est pas le dernier
+                return current_node.data[0]
             else:
                 current_node = current_node.next_node # continue de se déplacer
                 count += 1
         
-        if current_node.Data[1] == user_name:
-            return current_node.Data[0] # cas si l'index est le dernier
+        if current_node.data[1] == user_name:
+            return current_node.data[0] # cas si l'index est le dernier
     
     def clear_history(self): # efface l'historique and effaceant le premier node
         self.first_node = None

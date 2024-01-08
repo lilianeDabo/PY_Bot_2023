@@ -1,29 +1,29 @@
 import random
 ### Arbre binaire pour le systéme de discussion
 
-class branch: # Définition d'une branche binaire par défaut
+class Branch: # Définition d'une branche binaire par défaut
     def __init__(self, data, left=None, right=None):
-        self.Data = data
+        self.data = data
         self.yes = left
         self.no = right
 
-class binary_tree:
+class BinaryTree:
     def __init__(self):
         # Définition de l'enbranchement
-        self.start = branch("Would you like to discuss a certain topic ?")
-        self.yes_node = branch("Ok, what should we talk about ?")
-        self.yes_node.yes = branch("Would you like me to send an image of : ")
-        self.no_node = branch("That's alright, we can always talk at another time.")
+        self.start = Branch("Would you like to discuss a certain topic ?")
+        self.yes_node = Branch("Ok, what should we talk about ?")
+        self.yes_node.yes = Branch("Would you like me to send an image of : ")
+        self.no_node = Branch("That's alright, we can always talk at another time.")
 
         self.current_node = self.start # on se place sur le tout premier node
     
     def get_on_response(self, response): # Mouvement de l'arbre binaire selon la réponse
         if response == "yes":
             self.current_node = self.yes_node
-            return self.current_node.Data
+            return self.current_node.data
         elif response == "no":
             self.current_node = self.no_node
-            return self.current_node.Data
+            return self.current_node.data
         else:
             return "The response given was not clear. Please answer 'yes' or 'no'."
 
@@ -33,7 +33,7 @@ class binary_tree:
         return list[random.randint(0,1)]
 
     def get_current_dialogue(self): # Commence le questionnaire
-        return self.current_node.Data
+        return self.current_node.data
     
     def get_dialogue_reset(self): # Recommence le questionnaire
         self.current_node = self.start # on se replace sur le tout premier node
